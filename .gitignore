@@ -1,0 +1,21 @@
+# === Operating System Noise ===
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+
+# === .NET Core Build Artifacts ===
+[Bb]in/
+[Oo]bj/
+*.suo
+*.user
+*.sln.docstates
+
+# === IDE Configurations (Rider & VS Code) ===
+.idea/
+.vscode/
+*.userosscat
+*.rsuser
+
+# === Package & User Settings ===
+.packages/
