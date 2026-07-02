@@ -13,9 +13,20 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 // Register ApplicationDbContext with MySQL support using Pomelo
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString),
-        b => b.MigrationsAssembly("SecureNotesVault.Api"))); // Puts migration files in the API layer
-
+{
+    // If no MySQL string is found, or if it uses the default template, fall back to SQLite
+    if (string.IsNullOrEmpty(connectionString) || connectionString.Contains("YOUR_LOCAL_PASSWORD"))
+    {
+        // Creates a lightweight database file 'secure_notes.db' right inside the container
+        options.UseSqlite("Data Source=secure_notes.db",
+            b => b.MigrationsAssembly("SecureNotesVault.Api"));
+    }
+    else
+    {
+        options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString),
+            b => b.MigrationsAssembly("SecureNotesVault.Api"));
+    }
+});
 // Register our cryptographically secure encryption service
 builder.Services.AddSingleton<IEncryptionService, AesGcmEncryptionService>();builder.Services.AddScoped<IAuthService, AuthService>();
 
@@ -65,4 +76,11 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+// Automatically execute migrations and schema checks on container initialization
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    // This safely runs the EF Core migration script onto SQLite or MySQL instantly
+    await dbContext.Database.MigrateAsync();
+}
 app.Run();
