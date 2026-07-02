@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="../buildMultiTargeting/SecureNotesVault.Api.props" />
+</Project>
