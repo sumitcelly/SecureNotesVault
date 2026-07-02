@@ -33,7 +33,11 @@ builder.Services.AddSingleton<IEncryptionService, AesGcmEncryptionService>();bui
 // 3. Configure JWT Authentication Services
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = Encoding.UTF8.GetBytes(jwtSettings["Secret"]);
-
+if (string.IsNullOrEmpty(jwtSettings["Secret"]) || jwtSettings["Secret"] == "SuperSecretSecureNotesVaultKey2026!MustBeAtLeast32BytesLong")
+{
+    // In a real environment, you would throw an exception to block startup
+    Console.WriteLine("⚠️ WARNING: Utilizing the default insecure fallback JWT Secret. Ensure an environment override is injected in production staging.");
+}
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
